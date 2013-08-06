@@ -3,7 +3,7 @@ INCLUDES = -I$(VARNISHSRC)/include -I$(VARNISHSRC)
 vmoddir = $(VMODDIR)
 vmod_LTLIBRARIES = libvmod_geoip.la
 
-libvmod_geoip_la_LDFLAGS = -module -export-dynamic -avoid-version -lGeoIP
+libvmod_geoip_la_LDFLAGS = -module -export-dynamic -avoid-version -shared -lGeoIP
 
 libvmod_geoip_la_SOURCES = \
 	vcc_if.c \
