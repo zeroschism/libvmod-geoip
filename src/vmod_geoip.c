@@ -13,7 +13,7 @@
 
 #include "vrt.h"
 #include "vrt_obj.h"
-#include "bin/varnishd/cache.h"
+#include "cache/cache.h"
 
 #include "vcc_if.h"
 
@@ -21,13 +21,6 @@
 // The default string in case the GeoIP lookup fails
 #define GI_UNKNOWN_STRING "Unknown"
 
-
-int
-init_function(struct vmod_priv *pp, const struct VCL_conf *conf)
-{
-	// first call to lookup functions initializes pp
-	return (0);
-}
 
 static void
 init_priv(struct vmod_priv *pp) {
@@ -40,8 +33,8 @@ init_priv(struct vmod_priv *pp) {
 }
 
 
-const char *
-vmod_country_code(struct sess *sp, struct vmod_priv *pp, const char *ip)
+VCL_STRING
+vmod_country_code(const struct vrt_ctx *ctx, struct vmod_priv *pp, VCL_STRING ip)
 {
 	const char* country = NULL;
 
@@ -53,22 +46,22 @@ vmod_country_code(struct sess *sp, struct vmod_priv *pp, const char *ip)
 		country = GeoIP_country_code_by_addr((GeoIP *)pp->priv, ip);
 	}
 
-	return(WS_Dup(sp->wrk->ws, (country ? country : GI_UNKNOWN_STRING)));
+	return(WS_Copy(ctx->ws, (country ? country : GI_UNKNOWN_STRING), -1));
 }
 
-const char *
-vmod_client_country_code(struct sess *sp, struct vmod_priv *pp) {
-	return vmod_country_code(sp, pp, VRT_IP_string(sp, VRT_r_client_ip(sp)));
+VCL_STRING
+vmod_client_country_code(const struct vrt_ctx *ctx, struct vmod_priv *pp) {
+	return vmod_country_code(ctx, pp, VRT_IP_string(ctx, VRT_r_client_ip(ctx)));
 }
 
-const char *
-vmod_ip_country_code(struct sess *sp, struct vmod_priv *pp, struct sockaddr_storage *ip) {
-	return vmod_country_code(sp, pp, VRT_IP_string(sp, ip));
+VCL_STRING
+vmod_ip_country_code(const struct vrt_ctx *ctx, struct vmod_priv *pp, VCL_IP ip) {
+	return vmod_country_code(ctx, pp, VRT_IP_string(ctx, ip));
 }
 
 
-const char *
-vmod_country_name(struct sess *sp, struct vmod_priv *pp, const char *ip)
+VCL_STRING
+vmod_country_name(const struct vrt_ctx *ctx, struct vmod_priv *pp, VCL_STRING ip)
 {
 	const char* country = NULL;
 
@@ -80,22 +73,21 @@ vmod_country_name(struct sess *sp, struct vmod_priv *pp, const char *ip)
 		country = GeoIP_country_name_by_addr((GeoIP *)pp->priv, ip);
 	}
 
-	return(WS_Dup(sp->wrk->ws, (country ? country : GI_UNKNOWN_STRING)));
+	return(WS_Copy(ctx->ws, (country ? country : GI_UNKNOWN_STRING), -1));
 }
 
-const char *
-vmod_client_country_name(struct sess *sp, struct vmod_priv *pp) {
-	return vmod_country_name(sp, pp, VRT_IP_string(sp, VRT_r_client_ip(sp)));
+VCL_STRING
+vmod_client_country_name(const struct vrt_ctx *ctx, struct vmod_priv *pp) {
+	return vmod_country_name(ctx, pp, VRT_IP_string(ctx, VRT_r_client_ip(ctx)));
+} 
+VCL_STRING
+vmod_ip_country_name(const struct vrt_ctx *ctx, struct vmod_priv *pp, VCL_IP ip) {
+	return vmod_country_name(ctx, pp, VRT_IP_string(ctx, ip));
 }
 
-const char *
-vmod_ip_country_name(struct sess *sp, struct vmod_priv *pp, struct sockaddr_storage *ip) {
-	return vmod_country_name(sp, pp, VRT_IP_string(sp, ip));
-}
 
-
-const char *
-vmod_region_name(struct sess *sp, struct vmod_priv *pp, const char *ip)
+VCL_STRING
+vmod_region_name(const struct vrt_ctx *ctx, struct vmod_priv *pp, VCL_STRING ip)
 {
 	GeoIPRegion *gir;
 	const char* region = NULL;
@@ -105,22 +97,22 @@ vmod_region_name(struct sess *sp, struct vmod_priv *pp, const char *ip)
 	}
 
 	if (ip) {
-		if (gir = GeoIP_region_by_addr((GeoIP *)pp->priv, ip)) {
+		if ((gir = GeoIP_region_by_addr((GeoIP *)pp->priv, ip))) {
 			region = GeoIP_region_name_by_code(gir->country_code, gir->region);
 			// TODO: is gir* a local copy or the actual record?
 			GeoIPRegion_delete(gir);
 		}
 	}
 
-	return(WS_Dup(sp->wrk->ws, (region ? region : GI_UNKNOWN_STRING)));
+	return(WS_Copy(ctx->ws, (region ? region : GI_UNKNOWN_STRING), -1));
 }
 
-const char *
-vmod_client_region_name(struct sess *sp, struct vmod_priv *pp) {
-	return vmod_region_name(sp, pp, VRT_IP_string(sp, VRT_r_client_ip(sp)));
+VCL_STRING
+vmod_client_region_name(const struct vrt_ctx *ctx, struct vmod_priv *pp) {
+	return vmod_region_name(ctx, pp, VRT_IP_string(ctx, VRT_r_client_ip(ctx)));
 }
 
-const char *
-vmod_ip_region_name(struct sess *sp, struct vmod_priv *pp, struct sockaddr_storage *ip) {
-	return vmod_region_name(sp, pp, VRT_IP_string(sp, ip));
+VCL_STRING
+vmod_ip_region_name(const struct vrt_ctx *ctx, struct vmod_priv *pp, VCL_IP ip) {
+	return vmod_region_name(ctx, pp, VRT_IP_string(ctx, ip));
 }

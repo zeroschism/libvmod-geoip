@@ -1,28 +1,33 @@
-INCLUDES = -I$(VARNISHSRC)/include -I$(VARNISHSRC)
 
-vmoddir = $(VMODDIR)
+vmoddir = $(VMOD_DIR)
 vmod_LTLIBRARIES = libvmod_geoip.la
 
-libvmod_geoip_la_LDFLAGS = -module -export-dynamic -avoid-version -lGeoIP
+libvmod_geoip_la_CFLAGS = $(VMOD_INCLUDES)
+libvmod_geoip_la_LDFLAGS = -module -export-dynamic -avoid-version -shared \
+	-lGeoIP
 
 libvmod_geoip_la_SOURCES = \
-	vcc_if.c \
-	vcc_if.h \
 	vmod_geoip.c
-
-vcc_if.c vcc_if.h: $(VARNISHSRC)/lib/libvmod_std/vmod.py $(top_srcdir)/src/vmod_geoip.vcc
-	@PYTHON@ $(VARNISHSRC)/lib/libvmod_std/vmod.py $(top_srcdir)/src/vmod_geoip.vcc
+nodist_libvmod_geoip_la_SOURCES = \
+	vcc_if.c \
+	vcc_if.h
 
 VMOD_TESTS = tests/*.vtc
-.PHONY: $(VMOD_TESTS)
 
-tests/*.vtc:
-	$(VARNISHSRC)/bin/varnishtest/varnishtest -Dvarnishd=$(VARNISHSRC)/bin/varnishd/varnishd -Dvmod_topbuild=$(abs_top_builddir) $@
+$(libvmod_geoip_la_OBJECTS): vcc_if.h
 
-check: $(VMOD_TESTS)
+vcc_if.c vcc_if.h: $(VMODTOOL) $(top_srcdir)/src/vmod_geoip.vcc
+	$(PYTHON) $(VMODTOOL) $(top_srcdir)/src/vmod_geoip.vcc
+
+check:
+	$(VARNISHTEST) -Dvarnishd=$(VARNISHD) \
+	    -Dvmod_topbuild=$(abs_top_builddir) $(VMOD_TESTS)
 
 EXTRA_DIST = \
 	vmod_geoip.vcc \
 	$(VMOD_TESTS)
 
-CLEANFILES = $(builddir)/vcc_if.c $(builddir)/vcc_if.h
+CLEANFILES = $(builddir)/vcc_if.c \
+	$(builddir)/vcc_if.h \
+	$(builddir}/vmod_geoip.man.rst \
+	$(builddir)/vmod_geoip.rst
