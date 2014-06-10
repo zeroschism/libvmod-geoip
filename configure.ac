@@ -38,7 +38,10 @@ AC_HEADER_STDC
 AC_CHECK_HEADERS([sys/stdlib.h])
 
 # Check for python
-AC_CHECK_PROGS(PYTHON, [python3 python3.1 python3.2 python2.7 python2.6 python2.5 python2 python], [AC_MSG_ERROR([Python is needed to build this vmod, please install python.])])
+AC_CHECK_PROGS(PYTHON, [python3 python2.7 python2.6], "no")
+if test "x$PYTHON" = "xno"; then
+	AC_MSG_ERROR([Python > 2.5 is needed to build this vmod, please install Python 2.6 or greater.])
+fi
 
 VARNISH_VMOD_INCLUDES
 VARNISH_VMOD_DIR
