@@ -26,6 +26,7 @@ init_priv(struct vmod_priv *pp)
 	// If GEOIP_MMAP_CACHE doesn't work on a 64bit machine, try adding
 	// the flag "MAP_32BIT" to the mmap call. MMAP is not avail for WIN32.
 	pp->priv = GeoIP_new(GEOIP_MMAP_CACHE);
+	AN(pp->priv);
 	pp->free = (vmod_priv_free_f *)GeoIP_delete;
 	GeoIP_set_charset((GeoIP *)pp->priv, GEOIP_CHARSET_UTF8);
 }
