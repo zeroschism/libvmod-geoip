@@ -28,22 +28,6 @@ Inspired by http://drcarter.info/2010/07/another-way-to-link-varnish-and-maxmind
 FUNCTIONS
 =========
 
-client_country_code
--------------------
-
-Prototype
-        ::
-
-                client_country_code()
-Return value
-	STRING
-Description
-	Returns two-letter country code string from client IP address
-Example
-        ::
-
-                set req.http.X-Country-Code = geoip.client_country_code();
-
 ip_country_code (not exported yet)
 ----------------------------------
 
@@ -77,22 +61,6 @@ Example
                 set req.http.X-Country-Code = geoip.country_code("127.0.0.1");
 
 
-client_country_name
--------------------
-
-Prototype
-        ::
-
-                client_country_name()
-Return value
-	STRING
-Description
-	Returns country name string from client IP address
-Example
-        ::
-
-                set req.http.X-Country-Name = geoip.client_country_name();
-
 ip_country_name (not exported yet)
 ----------------------------------
 
@@ -125,22 +93,6 @@ Example
 
                 set req.http.X-Country-Name = geoip.country_name("127.0.0.1");
 
-
-client_region_name (not exported yet)
--------------------------------------
-
-Prototype
-        ::
-
-                client_region_name()
-Return value
-	STRING
-Description
-	Returns region name string from client IP address
-Example
-        ::
-
-                set req.http.X-Region-Name = geoip.client_region_name();
 
 ip_region_name (not exported yet)
 ---------------------------------
@@ -208,7 +160,7 @@ In your VCL you could then use this vmod along the following lines::
         sub vcl_req {
                 # This sets req.http.X-Country-Code to the country code
                 # associated with the client IP address
-                set req.http.X-Country-Code = geoip.client_country_code();
+                set req.http.X-Country-Code = geoip.country_code(client.ip);
         }
 
 HISTORY

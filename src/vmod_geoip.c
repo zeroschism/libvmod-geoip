@@ -46,13 +46,6 @@ vmod_country_code(const struct vrt_ctx *ctx, struct vmod_priv *pp,
 }
 
 VCL_STRING
-vmod_client_country_code(const struct vrt_ctx *ctx, struct vmod_priv *pp)
-{
-	return (vmod_country_code(ctx, pp, VRT_IP_string(ctx,
-		VRT_r_client_ip(ctx))));
-}
-
-VCL_STRING
 vmod_ip_country_code(const struct vrt_ctx *ctx, struct vmod_priv *pp,
     VCL_IP ip)
 {
@@ -72,13 +65,6 @@ vmod_country_name(const struct vrt_ctx *ctx, struct vmod_priv *pp,
 		country = GeoIP_country_name_by_addr((GeoIP *)pp->priv, ip);
 
 	return (WS_Copy(ctx->ws, (country ? country : GI_UNKNOWN_STRING), -1));
-}
-
-VCL_STRING
-vmod_client_country_name(const struct vrt_ctx *ctx, struct vmod_priv *pp)
-{
-	return (vmod_country_name(ctx, pp, VRT_IP_string(ctx,
-		VRT_r_client_ip(ctx))));
 }
 
 VCL_STRING
@@ -109,13 +95,6 @@ vmod_region_name(const struct vrt_ctx *ctx, struct vmod_priv *pp,
 	}
 
 	return (WS_Copy(ctx->ws, (region ? region : GI_UNKNOWN_STRING), -1));
-}
-
-VCL_STRING
-vmod_client_region_name(const struct vrt_ctx *ctx, struct vmod_priv *pp)
-{
-	return (vmod_region_name(ctx, pp, VRT_IP_string(ctx,
-		VRT_r_client_ip(ctx))));
 }
 
 VCL_STRING
