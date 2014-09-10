@@ -1,8 +1,8 @@
 varnishtest "Test geoip vmod"
 
 server s1 {
-       rxreq
-       txresp
+	rxreq
+	txresp
 } -start
 
 varnish v1 -vcl+backend {
@@ -17,6 +17,4 @@ client c1 {
 	txreq -url "/"
 	rxresp
 	expect resp.http.X-Country-Code == "DE"
-}
-
-client c1 -run
+} -run
