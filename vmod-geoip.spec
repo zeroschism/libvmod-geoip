@@ -1,7 +1,7 @@
 Summary: geoip VMOD for Varnish
 Name: vmod-geoip
-Version: 0.1
-Release: 2%{?dist}
+Version: 0.2
+Release: 1%{?dist}
 License: MIT
 Group: System Environment/Daemons
 Source0: libvmod-geoip.tar.gz

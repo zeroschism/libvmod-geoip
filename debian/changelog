@@ -1,3 +1,9 @@
+libvmod-geoip (0.2) unstable; urgency=medium
+
+  * Packaging release.
+
+ -- Lasse Karstensen <lkarsten@varnish-software.com>  Mon, 15 Sep 2014 16:40:38 +0200
+
 libvmod-geoip (0.1) unstable; urgency=low
 
   * First version
