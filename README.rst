@@ -188,7 +188,7 @@ Install the GeoIP library headers::
 
 To check out the current development source::
 
- git clone git://github.com/lampeh/libvmod-geoip.git
+ git clone git://github.com/varnish/libvmod-geoip.git
  cd libvmod-geoip; ./autogen.sh
 
 Usage::
