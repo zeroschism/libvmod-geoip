@@ -2,8 +2,10 @@ ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = src
 
-doc_DATA = README.rst
+DISTCHECK_CONFIGURE_FLAGS = \
+	VMOD_DIR='$${libdir}/varnish/vmods'
 
+doc_DATA = README.rst
 dist_man_MANS = vmod_geoip.3
 EXTRA_DIST = README.rst LICENSE vmod-geoip.spec debian
 
