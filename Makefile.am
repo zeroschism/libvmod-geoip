@@ -5,6 +5,8 @@ SUBDIRS = src
 doc_DATA = README.rst
 
 dist_man_MANS = vmod_geoip.3
+EXTRA_DIST = README.rst LICENSE vmod-geoip.spec debian
+
 MAINTAINERCLEANFILES = $(dist_man_MANS)
 
 vmod_geoip.3: README.rst
