@@ -1,10 +1,10 @@
 Source: libvmod-geoip
 Section: web
 Priority: extra
-Maintainer: Lasse Karstensen <lkarsten@varnish-software.com>
-Build-Depends: debhelper (>= 7), build-essential, python-docutils, libgeoip-dev, geoip-database
+Maintainer: Varnish Software <support@varnish-software.com>
+Build-Depends: debhelper (>= 7), build-essential, pkg-config, python-docutils, varnish (>= 4.0.2), libvarnishapi-dev (>= 4.0.2), libgeoip-dev, geoip-database
 Standards-Version: 3.8.1
-Vcs-Git: git://github.com/lkarsten/libvmod-geoip.git
+Vcs-Git: git://github.com/varnish/libvmod-geoip.git
 
 Package: libvmod-geoip
 Architecture: any
