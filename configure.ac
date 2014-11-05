@@ -1,6 +1,5 @@
-AC_PREREQ(2.59)
+AC_PREREQ(2.64)
 AC_INIT([libvmod-geoip], [trunk], [lampe@hauke-lampe.de], [libvmod-geoip])
-
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR(src/vmod_geoip.vcc)
 AM_CONFIG_HEADER(config.h)
