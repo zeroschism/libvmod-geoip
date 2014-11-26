@@ -30,6 +30,7 @@ make install DESTDIR=%{buildroot}
 mkdir -p %{buildroot}/usr/share/doc/%{name}/
 cp README.rst %{buildroot}/usr/share/doc/%{name}/
 cp LICENSE %{buildroot}/usr/share/doc/%{name}/
+rm %{buildroot}/usr/share/doc/libvmod-geoip/README.rst
 
 %clean
 rm -rf %{buildroot}
