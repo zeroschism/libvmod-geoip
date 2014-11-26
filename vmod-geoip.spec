@@ -6,8 +6,14 @@ License: MIT
 Group: System Environment/Daemons
 Source0: libvmod-geoip.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-Requires: varnish >= 4.0.2, GeoIP, geoip-geolite
-BuildRequires: make, python-docutils, GeoIP-devel
+Requires: varnish >= 4.0.2
+Requires: GeoIP
+Requires: geoip-geolite
+BuildRequires: make
+BuildRequires: python-docutils
+BuildRequires: varnish >= 4.0.2
+BuildRequires: varnish-libs-devel >= 4.0.2
+BuildRequires: GeoIP-devel
 
 %description
 geoip VMOD
