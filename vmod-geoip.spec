@@ -22,7 +22,7 @@ geoip VMOD
 %setup -n libvmod-geoip-trunk
 
 %build
-./configure --prefix=/usr/ --docdir='${datarootdir}/doc/%{name}'
+%configure --prefix=/usr/
 make
 make check
 
