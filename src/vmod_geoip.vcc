@@ -14,3 +14,13 @@ Function STRING client_country_name(PRIV_VCL)
 #Function STRING region_name(PRIV_VCL, STRING)
 ##Function STRING ip_region_name(PRIV_VCL, IP)
 #Function STRING client_region_name(PRIV_VCL)
+
+## look up city names
+$Function STRING city(PRIV_VCL, STRING)
+
+## look up latitude
+$Function STRING latitude(PRIV_VCL, STRING)
+
+## look up longitude
+$Function STRING longitude(PRIV_VCL, STRING)
+

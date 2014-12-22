@@ -8,7 +8,7 @@
 */
 
 #include <stdlib.h>
-#include <GeoIP.h>
+#include <GeoIPCity.h>
 
 #include "vrt.h"
 #include "vrt_obj.h"
@@ -17,7 +17,7 @@
 #include "vcc_if.h"
 
 // The default string in case the GeoIP lookup fails
-#define GI_UNKNOWN_STRING "Unknown"
+#define GI_UNKNOWN_STRING ""
 
 static void
 init_priv(struct vmod_priv *pp)
@@ -28,6 +28,64 @@ init_priv(struct vmod_priv *pp)
 	pp->priv = GeoIP_new(GEOIP_MMAP_CACHE);
 	pp->free = (vmod_priv_free_f *)GeoIP_delete;
 	GeoIP_set_charset((GeoIP *)pp->priv, GEOIP_CHARSET_UTF8);
+}
+
+GeoIPRecord*
+get_geoip_record(const struct, vrt_ctx *ctx, struct vmod_priv *pp, const char * ip) {
+    if (!pp->priv)
+	init_priv(pp);
+
+    return GeoIP_record_by_addr(pp->priv, ip);
+}
+
+const char *
+vmod_city(const struct, vrt_ctx *ctx, struct vmod_priv *pp, const char * ip) {
+    GeoIPRecord *record;
+
+    if (ip) {
+	record = get_geoip_record(ctx, pp, ip);
+	if (record)
+	    return record->city;
+    }
+
+    //no ip passed, or no record retrieved   
+    return GI_UNKNOWN_STRING;
+}
+
+const char *
+vmod_latitude(const struct, vrt_ctx *ctx, struct vmod_priv *pp, const char * ip) {
+    GeoIPRecord *record;
+    const char *lat;
+
+    if (ip) {
+	record = get_geoip_record(ctx, pp, ip);
+	if (record)
+	    sprintf(lat,"%f",record->latitude);
+	else
+	    lat = GI_UNKNOWN_STRING;
+
+	return lat;
+    }
+
+    return GI_UNKNOWN_STRING;
+}
+
+const char *
+vmod_longitude(const struct, vrt_ctx *ctx, struct vmod_priv *pp, const char * ip) {
+    GeoIPRecord *record;
+    const char *longitude;
+
+    if (ip) {
+	record = get_geoip_record(ctx, pp, ip);
+	if (record)
+	    sprintf(longitude,"%f",record->longitude);
+	else
+	    longitude = GI_UNKNOWN_STRING;
+	
+	return longitude;
+    }
+
+    return GI_UNKNOWN_STRING;
 }
 
 const char *
