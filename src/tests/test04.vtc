@@ -9,12 +9,13 @@ varnish v1 -vcl+backend {
         import geoip from "${vmod_topbuild}/src/.libs/libvmod_geoip.so";
 
         sub vcl_deliver {
-                set resp.http.X-Geo-City = geoip.city("38.100.147.146");
+                set resp.http.X-Geo-Latitude = geoip.latitude("93.184.209.207");
         }
 } -start
 
 client c1 {
         txreq -url "/"
         rxresp
-        expect resp.http.X-Geo-City == "Houston"
+        expect resp.http.X-Geo-Latitude == "52.349998"
 } -run
+
