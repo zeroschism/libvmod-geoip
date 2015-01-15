@@ -328,6 +328,42 @@ vmod_country_name_v6_ip(struct sess *sp, struct vmod_priv *pp, struct sockaddr_s
     return (vmod_country_name_v6(sp, pp, VRT_IP_string(sp, ip)));
 }
 
+const char *
+vmod_region(struct sess *sp, struct vmod_priv *pp, const char *ip) {
+    GeoIPRecord *record;
+
+    if (ip) {
+	record = get_geoip_record(sp, pp, ip);
+	if (record) {
+	    return record->region;
+    }
+
+    return GI_UNKNOWN_STRING;
+}
+
+const char *
+vmod_region_ip(struct sess *sp, struct vmod_priv *pp, struct sockaddr_storage *ip) {
+    return (vmod_region(sp, pp, VRT_IP_string(sp, ip)));
+}
+
+const char *
+vmod_region_v6(struct sess *sp, struct vmod_priv *pp, const char *ip) {
+    GeoIPRecord *record;
+
+    if (ip) {
+	record = get_geoip_record_v6(pp, ip);
+	if (record)
+	    return record->region;
+    }
+
+    return GI_UNKNOWN_STRING;
+}
+
+const char *
+vmod_region_v6_ip(struct sess *sp, struct vmmod_priv *pp, struct sockaddr_storage *ip) {
+    return (vmod_region(sp, pp, VRT_IP_string(sp,ip)));
+}
+
 /*
 const char *
 vmod_country_code(struct sess *sp, struct vmod_priv *pp,

@@ -13,9 +13,10 @@ Function STRING country_name_v6(PRIV_VCL, STRING)
 Function STRING country_name_v6_ip(PRIV_VCL, IP)
 
 ## region name functions not enabled yet
-#Function STRING region_name(PRIV_VCL, STRING)
-##Function STRING ip_region_name(PRIV_VCL, IP)
-#Function STRING client_region_name(PRIV_VCL)
+Function STRING region(PRIV_VCL, STRING)
+Function STRING region_ip(PRIV_VCL, IP)
+Function STRING region_v6(PRIV_VCL, STRING)
+Function STRING region_v6_ip(PRIV_VCL, IP)
 
 ## look up city names
 Function STRING city(PRIV_VCL, STRING)
