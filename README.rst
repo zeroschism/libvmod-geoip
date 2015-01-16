@@ -6,9 +6,9 @@ vmod_geoip
 Varnish GeoIP Lookup Module
 ---------------------------
 
-:Author: Hauke Lampe
-:Date: 2011-09-26
-:Version: 1.0
+:Author: Adam Schumacher
+:Date: 2014-12-23
+:Version: 0.3
 :Manual section: 3
 
 SYNOPSIS
@@ -19,46 +19,16 @@ import geoip;
 DESCRIPTION
 ===========
 
-This Varnish module exports functions to look up GeoIP country codes.
-Requires GeoIP library (on Debian install libgeoip-dev)
+This Varnish module exports functions to look up GeoIP country codes, country names, city names, and long/lat information.
+Requires GeoIP City (and the base GeoIP) library, along with the geoipcity and geoipcityv6 binary .dat databases
+
+Forked from: https://github.com/varnish/libvmod-geoip
 
 Inspired by http://drcarter.info/2010/07/another-way-to-link-varnish-and-maxmind-geoip/
 
 
 FUNCTIONS
 =========
-
-client_country_code
--------------------
-
-Prototype
-        ::
-
-                client_country_code()
-Return value
-	STRING
-Description
-	Returns two-letter country code string from client IP address
-Example
-        ::
-
-                set req.http.X-Country-Code = geoip.client_country_code();
-
-ip_country_code (not exported yet)
-----------------------------------
-
-Prototype
-        ::
-
-                ip_country_code(IP I)
-Return value
-	STRING
-Description
-	Returns two-letter country code string from IP address
-Example
-        ::
-
-                set req.http.X-Country-Code = geoip.ip_country_code(client.ip);
 
 country_code
 ------------
@@ -70,36 +40,36 @@ Prototype
 Return value
 	STRING
 Description
-	Returns two-letter country code string
+	Returns two-letter country code string from IP address in string S
 Example
         ::
 
                 set req.http.X-Country-Code = geoip.country_code("127.0.0.1");
 
-
-client_country_name
--------------------
+country_code_ip 
+---------------
 
 Prototype
         ::
 
-                client_country_name()
+                country_code_ip(IP I)
 Return value
 	STRING
 Description
-	Returns country name string from client IP address
+	Returns two-letter country code string from IP address
 Example
         ::
 
-                set req.http.X-Country-Name = geoip.client_country_name();
+                set req.http.X-Country-Code = geoip.country_code_ip(client.ip);
 
-ip_country_name (not exported yet)
-----------------------------------
+
+country_name_ip
+---------------
 
 Prototype
         ::
 
-                ip_country_name(IP I)
+                country_name_ip(IP I)
 Return value
 	STRING
 Description
@@ -107,7 +77,7 @@ Description
 Example
         ::
 
-                set req.http.X-Country-Name = geoip.ip_country_name(client.ip);
+                set req.http.X-Country-Name = geoip.country_name_ip(client.ip);
 
 country_name
 ------------
@@ -126,29 +96,112 @@ Example
                 set req.http.X-Country-Name = geoip.country_name("127.0.0.1");
 
 
-client_region_name (not exported yet)
--------------------------------------
+latitude
+--------
 
 Prototype
-        ::
+	::
 
-                client_region_name()
+	    latitude(STRING S)
 Return value
 	STRING
 Description
-	Returns region name string from client IP address
+	Returns latitude
 Example
-        ::
+	::
+	    
+	    set req.http.X-Geo-Latitude = geoip.latitude("127.0.0.1");
 
-                set req.http.X-Region-Name = geoip.client_region_name();
+latitude_ip
+-----------
 
-ip_region_name (not exported yet)
----------------------------------
+Prototype
+	::
+	    
+	    latitude_ip(IP I)
+Return value
+	STRING
+Description
+	Returns latitude
+Example
+	::
+
+	    set req.http.X-Geo-Latitude = geoip.latitude_ip(client.ip);
+
+city
+----
+
+Prototype
+	::
+
+	    city(STRING S)
+Return value
+	STRING
+Description
+	Returns the name of the city
+Example
+	::
+
+	    set req.http.X-Geo-City = geoip.city("127.0.0.1");
+
+city_ip
+----
 
 Prototype
         ::
 
-                ip_region_name(IP I)
+            city_ip(IP I)
+Return value
+        STRING
+Description
+        Returns the name of the city
+Example
+        ::
+
+            set req.http.X-Geo-City = geoip.city_ip("127.0.0.1");
+
+
+longitude
+--------
+
+Prototype
+        ::
+
+            longitude(STRING S)
+Return value
+        STRING
+Description
+        Returns longitude 
+Example
+        ::
+            
+            set req.http.X-Geo-Latitude = geoip.longitude("127.0.0.1");
+
+longitude_ip
+-----------
+
+Prototype
+        ::
+            
+            longitude_ip(IP I)
+Return value
+        STRING
+Description
+        Returns longitude
+Example
+        ::
+
+            set req.http.X-Geo-Latitude = geoip.longitude_ip(client.ip);
+
+
+
+region_name_ip 
+---------
+
+Prototype
+        ::
+
+                region_name_ip(IP I)
 Return value
 	STRING
 Description
@@ -158,8 +211,8 @@ Example
 
                 set req.http.X-Region-Name = geoip.ip_region_name(client.ip);
 
-region_name (not exported yet)
-------------------------------
+region_name 
+-----------
 
 Prototype
         ::
@@ -174,6 +227,24 @@ Example
 
                 set req.http.X-Region-Name = geoip.region_name("127.0.0.1");
 
+IPv6 FUNCTIONS
+==============
+
+These functions work identically to their ipv4 counterparts, except they take an ipv6 address as an argument and search the v6 database (if configured and available at compile-time)
+
+* country_code_v6
+* country_code_v6_ip
+* country_name_v6
+* country_name_v6_ip
+* city_v6
+* city_v6_ip
+* latitude_v6
+* latitude_v6_ip
+* longitude_v6
+* longitude_v6_ip
+* region_name_v6
+* region_name_v6_ip
+
 
 INSTALLATION
 ============
@@ -182,25 +253,28 @@ The source tree is based on autotools to configure the building, and
 does also have the necessary bits in place to do functional unit tests
 using the varnishtest tool.
 
-Install the GeoIP library headers::
-
- apt-get install libgeoip-dev
+Install the GeoIP and GeoIPCity library headers
+Ensure that there is a .dat for the city data, and ipv6 data if you want to support that
 
 To check out the current development source::
 
- git clone git://github.com/varnish/libvmod-geoip.git
+ git clone git://github.com/zeroschism/libvmod-geoip.git
  cd libvmod-geoip; ./autogen.sh
 
 Usage::
 
- ./configure VARNISHSRC=DIR [VMODDIR=DIR]
+ ./configure --with-dat=/usr/local/share/GeoIP/GeoIPCity.dat --with-ipv6-dat=/usr/local/share/GeoIP/GeoLiteCityv6.dat --with-varnishsrc=/usr/ports/www/varnish/work/varnish-3.0.5 --with-vmod-dir=/usr/local/lib/varnish/vmods
 
-`VARNISHSRC` is the directory of the Varnish source tree for which to
-compile your vmod. Both the `VARNISHSRC` and `VARNISHSRC/include`
-will be added to the include search paths for your module.
+ ./configure VARNISHSRC=DIR [VMODDIR=DIR] [--with-ipv6[=<location/to/GeoIPCityv6.dat>]] [--with-dat=<location/to/GeoIPCity.dat]
 
-Optionally you can also set the vmod install directory by adding
-`VMODDIR=DIR` (defaults to the pkg-config discovered directory from your
+`with-dat` is the path to the GeoIPCity.dat file containing the binary database to use for lookups.
+
+`with-ipv6-dat` is the path to the GeoIPCityv6.dat file containing the binary database to use for ipv6 lookups.  This option also enables the ipv6 functions.
+
+`with-varnishsrc` is the directory of the Varnish source tree against which to
+compile your vmod. 
+
+`with-vmod-dir` Optionally you can also set the vmod install directory (defaults to the pkg-config discovered directory from your
 Varnish installation).
 
 Make targets:
@@ -216,14 +290,15 @@ In your VCL you could then use this vmod along the following lines::
         sub vcl_req {
                 # This sets req.http.X-Country-Code to the country code
                 # associated with the client IP address
-                set req.http.X-Country-Code = geoip.client_country_code();
+                set req.http.X-Country-Code = geoip.country_code_ip(client.ip);
         }
 
 HISTORY
 =======
 
-No history yet.
-
+2011-09-26 -- Original version by Hauke Lampe
+2014-12-23 -- Refinements to utilize the expanded data available in GeoIPCity and access ipv6 from GeoIPCityv6 by Adam Schumacher
+2015-01-16 -- Updates to the install files and documentation by Adam Schumacher
 
 COPYRIGHT
 =========
