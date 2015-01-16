@@ -1,0 +1,167 @@
+.\" Manpage for vmod-geoip
+.\" Contact adam.schumacher@flightaware.com to correct errors or typos.
+.TH man 3 "01 Jan 2015" "0.3" "libgeoip_vmod man page"
+.SH NAME
+vmod_geoip -- Varnish GeoIP Lookup Module
+.SH SYNOPSIS
+import geoip;
+.SH DESCRIPTION
+This Varnish module exports functions to look up GeoIP country codes, city names, latitude, longitute, and region names given an ipv4 (or optionally an ipv6) address.  It requires the GeoIP library, and a GeoIPCity (and optionally GeoIPCityv6) database.
+.SH FUNCTIONS
+.TP
+.B country_code
+ country_code(STRING S)
+.IP Return value
+STRING
+.IP Description
+Returns two-letter country code string from IP address in string S
+.IP Example
+set req.http.X-Country-Code = geoip.country_code("127.0.0.1");
+
+.PP
+.TP
+.B country_code_ip 
+country_code_ip(IP I)
+.IP Return value
+STRING
+.IP Description
+Returns two-letter country code string from IP address
+.IP Example
+set req.http.X-Country-Code = geoip.country_code_ip(client.ip);
+
+.PP
+.TP
+.B country_name_ip
+country_name_ip(IP I)
+.IP Return value
+STRING
+.IP Description
+Returns country name string from IP address
+.IP Example
+set req.http.X-Country-Name = geoip.country_name_ip(client.ip);
+
+.PP
+.TP
+.B country_name
+country_name(STRING S)
+.IP Return value
+STRING
+.IP Description
+Returns country name string
+.IP Example
+set req.http.X-Country-Name = geoip.country_name("127.0.0.1");
+
+.PP
+.TP
+.B city
+city(STRING S)
+.IP Return value
+STRING
+.IP Description
+Returns city
+.IP Example    
+set req.http.X-Geo-City = geoip.city("127.0.0.1");
+
+.PP
+.TP
+.B city_ip      
+city_ip(IP I)
+.IP Return value
+STRING
+.IP Description
+Returns city
+.IP Example
+set req.http.X-Geo-City = geoip.city_ip(client.ip);
+
+.PP
+.TP
+.B region_name
+region_name(STRING S)
+.IP Return value
+STRING
+.IP Description
+Returns region_name
+.IP Example    
+set req.http.X-Geo-Region = geoip.region_name("127.0.0.1");
+
+.PP
+.TP
+.B region_name_ip      
+region_name_ip(IP I)
+.IP Return value
+STRING
+.IP Description
+Returns region_name
+.IP Example
+set req.http.X-Geo-Region = geoip.region_name_ip(client.ip);
+
+.PP
+.TP
+.B latitude
+latitude(STRING S)
+.IP Return value
+STRING
+.IP Description
+Returns latitude
+.IP Example    
+set req.http.X-Geo-Latitude = geoip.latitude("127.0.0.1");
+
+.PP
+.TP
+.B latitude_ip      
+latitude_ip(IP I)
+.IP Return value
+STRING
+.IP Description
+Returns latitude
+.IP Example
+set req.http.X-Geo-Latitude = geoip.latitude_ip(client.ip);
+
+.PP
+.TP
+.B longitude
+longitude(STRING S)
+.IP Return value
+STRING
+.IP Description
+Returns longitude
+.IP Example    
+set req.http.X-Geo-Longitude = geoip.longitude("127.0.0.1");
+
+.PP
+.TP
+.B longitude_ip      
+longitude_ip(IP I)
+.IP Return value
+STRING
+.IP Description
+Returns longitude
+.IP Example
+set req.http.X-Geo-Longitude = geoip.longitude_ip(client.ip);
+
+.SH IPV6 FUNCTIONS
+If --with-ipv6-dat is specified and a GeoIPCityv6.dat is available on the system, then the following functions will be available for looking up ipv6 addresses.  They have the same input and outputs as their ipv4 versions, other than requiring a v6 address to be passed in.
+
+.PP
+.B country_code_v6
+.B country_code_v6_ip
+.B country_name_v6
+.B country_name_v6_ip
+.B city_v6
+.B city_v6_ip
+.B latitude_v6
+.B latitude_v6_ip
+.B longitude_v6
+.B longitude_v6_ip
+.B region_name_v6
+.B region-name_v6_ip
+
+.SH BUGS
+None known at this time
+
+.SH AUTHOR
+Adam Schumacher <adam.schumacher@flightaware.com>
+
+.SH SEE ALSO
+VCL(7)
+
