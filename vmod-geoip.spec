@@ -1,6 +1,6 @@
 Summary: geoip VMOD for Varnish
 Name: vmod-geoip
-Version: 0.2
+Version: 0.5
 Release: 1%{?dist}
 License: MIT
 Group: System Environment/Daemons
@@ -12,15 +12,13 @@ BuildRequires: python-docutils
 BuildRequires: GeoIP-devel
 
 %description
-geoip VMOD
+This Varnish module exports functions to look up GeoIP country codes, country names, city names, and long/lat information. Requires GeoIP City (and the base GeoIP) library, along with the geoipcity and geoipcityv6 binary .dat databases
 
 %prep
 %setup -n libvmod-geoip
 
 %build
-# this assumes that VARNISHSRC is defined on the rpmbuild command line, like this:
-# rpmbuild -bb --define 'VARNISHSRC /home/user/rpmbuild/BUILD/varnish-3.0.3' redhat/*spec
-./configure VARNISHSRC=%{VARNISHSRC} VMODDIR="$(PKG_CONFIG_PATH=%{VARNISHSRC} pkg-config --variable=vmoddir varnishapi)" --prefix=/usr/ --docdir='${datarootdir}/doc/%{name}'
+%configure
 make
 make check
 
@@ -33,9 +31,15 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root,-)
 %{_libdir}/varnis*/vmods/
-%doc /usr/share/doc/%{name}/*
 %{_mandir}/man?/*
 
 %changelog
 * Tue Nov 14 2012 Lasse Karstensen <lasse@varnish-software.com> - 0.1-0.20121114
 - Initial version.
+* Tue Dec 23 2014 Adam Schumacher <adam.schumacher@flightaware.com> - 0.20121114-0.3
+- Changed to use GeoIPCity.h functions and data
+- Updated to include ipv6 database as well
+* Fri Jan 16 2015 Adam Schumacher <adam.schumacher@flightaware.com> - 0.3-0.4
+- Updates to the install files and documentation
+* Tue Jan 20 2015 Adam Schumacher <adam.schumacher@flightaware.com> - 0.4-0.5
+- Refine how the dat files are loaded and simplify install options

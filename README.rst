@@ -7,8 +7,8 @@ Varnish GeoIP Lookup Module
 ---------------------------
 
 :Author: Adam Schumacher
-:Date: 2014-12-23
-:Version: 0.3
+:Date: 2015-01-20
+:Version: 0.5
 :Manual section: 3
 
 SYNOPSIS
@@ -264,8 +264,6 @@ To check out the current development source::
 Usage::
 
  ./configure --with-ipv6 --with-varnishsrc=/usr/ports/www/varnish/work/varnish-3.0.5 --with-vmod-dir=/usr/local/lib/varnish/vmods
-
- ./configure VARNISHSRC=DIR [VMODDIR=DIR] [--with-ipv6[=<location/to/GeoIPCityv6.dat>]] [--with-dat=<location/to/GeoIPCity.dat]
 
 `with-ipv6` Build IPv6 support to make the _v6 functions available.  An ipv6 dat file must exist in addition to the ipv4 one.
 
