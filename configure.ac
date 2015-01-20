@@ -1,5 +1,5 @@
 AC_PREREQ(2.59)
-AC_INIT([libvmod-geoip], [0.2], [lampe@hauke-lampe.de], [libvmod-geoip])
+AC_INIT([libvmod-geoip], [0.3], [adam.schumacher@flightaware.com], [libvmod-geoip])
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR(src/vmod_geoip.vcc)
@@ -22,20 +22,24 @@ AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 AC_PROG_MAKE_SET
 
-# Check for rst utilities
-AC_CHECK_PROGS(RST2MAN, [rst2man rst2man.py], "no")
-if test "x$RST2MAN" = "xno"; then
-	AC_MSG_WARN([rst2man not found - not building man pages])
-fi
-AM_CONDITIONAL(HAVE_RST2MAN, [test "x$RST2MAN" != "xno"])
-
 # Check for pkg-config
 PKG_PROG_PKG_CONFIG
 #PKG_CHECK_MODULES([libGeoIP], [geoip])
 
 # Checks for header files.
+CFLAGS="$CFLAGS -I/usr/local/include"
+LDFLAGS="$LDFLAGS -L/usr/local/lib"
+
 AC_HEADER_STDC
-AC_CHECK_HEADERS([sys/stdlib.h])
+AC_CHECK_HEADER([GeoIPCity.h], [ ], [AC_MSG_FAILURE([GeoIPCity.h not found. This is required.])])
+
+# Check if ipv6 enabled
+AC_ARG_WITH([ipv6], AS_HELP_STRING([--with-ipv6], [Enable ipv6 lookups (requires ipv6 dat file)]))
+
+AS_IF([test "x$with_ipv6" != "xno"],
+	[AC_DEFINE([HAVE_GEOIP_V6], [1], [Enable ipv6 functionality])]
+	[AC_SUBST([VCC_FILE], ['vmod_geoip_v6.vcc'])],
+    [AC_SUBST([VCC_FILE], ['vmod_geoip.vcc'])])
 
 # Check for python
 AC_CHECK_PROGS(PYTHON, [python3 python3.1 python3.2 python2.7 python2.6 python2.5 python2 python], "no")
@@ -44,30 +48,24 @@ if test "x$PYTHON" = "xno"; then
 fi
 
 # Varnish source tree
-AC_ARG_VAR([VARNISHSRC], [path to Varnish source tree (mandatory)])
-if test "x$VARNISHSRC" = x; then
-	AC_MSG_ERROR([No Varnish source tree specified])
-fi
-VARNISHSRC=`cd $VARNISHSRC && pwd`
-AC_CHECK_FILE([$VARNISHSRC/include/varnishapi.h],
-	[],
-	[AC_MSG_FAILURE(["$VARNISHSRC" is not a Varnish source directory])]
-)
+AC_ARG_WITH([varnishsrc], AS_HELP_STRING([--with-varnishsrc=/path/to/varnish], [path to Varnish source tree (mandatory)]))
+
+AS_IF([test "x$with_varnishsrc" != "xno"],
+    [AC_CHECK_FILE(["$with_varnishsrc"/include/varnishapi.h], [AC_SUBST([VARNISHSRC], [$with_varnishsrc])], [AC_MSG_FAILURE(["$with_varnishsrc" is not a Varnish source directory])])],
+    [AC_MSG_ERROR([You must specifiy a path to the Varnish source directory])])
 
 # Check that varnishtest is built in the varnish source directory
-AC_CHECK_FILE([$VARNISHSRC/bin/varnishtest/varnishtest],
+AC_CHECK_FILE(["$with_varnishsrc"/bin/varnishtest/varnishtest],
 	[],
-	[AC_MSG_FAILURE([Can't find "$VARNISHSRC/bin/varnishtest/varnishtest". Please build your varnish source directory])]
+	[AC_MSG_FAILURE([Cannot find "$with_varnishsrc"/bin/varnishtest/varnishtest. Please build your varnish source directory])]
 )
 
 # vmod installation dir
-AC_ARG_VAR([VMODDIR], [vmod installation directory @<:@LIBDIR/varnish/vmods@:>@])
-if test "x$VMODDIR" = x; then
-	VMODDIR=`pkg-config --variable=vmoddir varnishapi`
-	if test "x$VMODDIR" = x; then
-		AC_MSG_FAILURE([Can't determine vmod installation directory])
-	fi
-fi
+AC_ARG_WITH([vmod-dir], AS_HELP_STRING([--with-vmod-dir\[=/path/to/installdir\]], [vmod installation directory @<:@LIBDIR/varnish/vmods@:>@]))
+
+AS_IF([test "x$with_vmod_dir" = "x"],
+    [AC_SUBST([VMODDIR], [`pkg-config --variable=vmoddir varnishapi`])],
+    [AC_SUBST([VMODDIR], [$with_vmod_dir])])
 
 AC_CONFIG_FILES([
 	Makefile

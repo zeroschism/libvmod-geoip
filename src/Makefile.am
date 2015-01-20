@@ -16,8 +16,8 @@ VMOD_TESTS = tests/*.vtc
 
 $(libvmod_geoip_la_OBJECTS): vcc_if.h
 
-vcc_if.c vcc_if.h: $(VARNISHSRC)/lib/libvmod_std/vmod.py $(top_srcdir)/src/vmod_geoip.vcc
-	$(PYTHON) $(VARNISHSRC)/lib/libvmod_std/vmod.py $(top_srcdir)/src/vmod_geoip.vcc
+vcc_if.c vcc_if.h: $(VARNISHSRC)/lib/libvmod_std/vmod.py $(top_srcdir)/src/$(VCC_FILE)
+	$(PYTHON) $(VARNISHSRC)/lib/libvmod_std/vmod.py $(top_srcdir)/src/$(VCC_FILE)
 
 check:
 	$(VARNISHSRC)/bin/varnishtest/varnishtest \

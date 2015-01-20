@@ -7,6 +7,8 @@
  * This code is licensed under a MIT-style License, see file LICENSE
 */
 
+#include "config.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <GeoIPCity.h>
@@ -208,7 +210,7 @@ vmod_region_name_ip(struct sess *sp, struct vmod_priv *pp, struct sockaddr_stora
     return (vmod_region_name(sp, pp, VRT_IP_string(sp, ip)));
 }
 
-//#ifdef WITH_GEOIP_V6
+#ifdef HAVE_GEOIP_V6
 
 int
 init_priv_v6(struct vmod_priv *pp)
@@ -391,4 +393,4 @@ vmod_region_name_v6_ip(struct sess *sp, struct vmod_priv *pp, struct sockaddr_st
 }
 
 
-//#endif
+#endif
