@@ -140,7 +140,7 @@ Returns longitude
 set req.http.X-Geo-Longitude = geoip.longitude_ip(client.ip);
 
 .SH IPV6 FUNCTIONS
-If --with-ipv6-dat is specified and a GeoIPCityv6.dat is available on the system, then the following functions will be available for looking up ipv6 addresses.  They have the same input and outputs as their ipv4 versions, other than requiring a v6 address to be passed in.
+If --with-ipv6 is specified and an ipv6 database is available, then the following functions will be available for looking up ipv6 addresses.  They have the same input and outputs as their ipv4 versions, other than requiring a v6 address to be passed in.
 
 .PP
 .B country_code_v6

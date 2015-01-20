@@ -263,16 +263,13 @@ To check out the current development source::
 
 Usage::
 
- ./configure --with-dat=/usr/local/share/GeoIP/GeoIPCity.dat --with-ipv6-dat=/usr/local/share/GeoIP/GeoLiteCityv6.dat --with-varnishsrc=/usr/ports/www/varnish/work/varnish-3.0.5 --with-vmod-dir=/usr/local/lib/varnish/vmods
+ ./configure --with-ipv6 --with-varnishsrc=/usr/ports/www/varnish/work/varnish-3.0.5 --with-vmod-dir=/usr/local/lib/varnish/vmods
 
  ./configure VARNISHSRC=DIR [VMODDIR=DIR] [--with-ipv6[=<location/to/GeoIPCityv6.dat>]] [--with-dat=<location/to/GeoIPCity.dat]
 
-`with-dat` is the path to the GeoIPCity.dat file containing the binary database to use for lookups.
+`with-ipv6` Build IPv6 support to make the _v6 functions available.  An ipv6 dat file must exist in addition to the ipv4 one.
 
-`with-ipv6-dat` is the path to the GeoIPCityv6.dat file containing the binary database to use for ipv6 lookups.  This option also enables the ipv6 functions.
-
-`with-varnishsrc` is the directory of the Varnish source tree against which to
-compile your vmod. 
+`with-varnishsrc` is the directory of the Varnish source tree against which to compile your vmod. 
 
 `with-vmod-dir` Optionally you can also set the vmod install directory (defaults to the pkg-config discovered directory from your
 Varnish installation).
@@ -299,6 +296,7 @@ HISTORY
 2011-09-26 -- Original version by Hauke Lampe
 2014-12-23 -- Refinements to utilize the expanded data available in GeoIPCity and access ipv6 from GeoIPCityv6 by Adam Schumacher
 2015-01-16 -- Updates to the install files and documentation by Adam Schumacher
+2015-01-20 -- Refine how the dat files are loaded and simplify install options
 
 COPYRIGHT
 =========
