@@ -23,6 +23,23 @@
 #define GI_UNKNOWN_STRING ""
 #define HEADER_MAXLEN 255
 
+typedef struct vmod_geoip_db_type { 
+    GeoIP    *ipv4;
+    GeoIP    *ipv6;
+} GeoipDB;
+
+void
+cleanup_db(GeoipDB *db)
+{
+    if (db->ipv4)
+	GeoIP_delete(db->ipv4);
+
+    if (db->ipv6)
+	GeoIP_delete(db->ipv6);
+
+    free(db);
+}
+
 int
 init_priv(struct vmod_priv *pp)
 {
@@ -33,15 +50,28 @@ init_priv(struct vmod_priv *pp)
 	//pp->priv = GeoIP_open_type(GEOIP_CITY_EDITION_REV1,GEOIP_MMAP_CACHE);
 	//pp->priv = GeoIP_open(GEOIP_DAT_FILE,GEOIP_MMAP_CACHE);
 
-	pp->priv = GeoIP_open_type(GEOIP_CITY_EDITION_REV1,GEOIP_MMAP_CACHE);
-	if (pp->priv) {
-	    pp->free = (vmod_priv_free_f *)GeoIP_delete;
-	    GeoIP_set_charset((GeoIP *)pp->priv, GEOIP_CHARSET_UTF8);
-	    return 1;
+	GeoipDB *db;
+	GeoIP *Rec = GeoIP_open_type(GEOIP_CITY_EDITION_REV1,GEOIP_MMAP_CACHE);
+	if (!Rec)
+	    return 0;
+
+	if (pp->priv) { 
+	    db = (GeoipDB *)pp->priv;
+	    db->ipv4 = Rec;
+	    GeoIP_set_charset(db->ipv4, GEOIP_CHARSET_UTF8);
 	}
 	else {
-	    return 0;
+	    db = (GeoipDB *)calloc(0,sizeof(GeoipDB));
+	    db->ipv4 = Rec;
+	    GeoIP_set_charset(db->ipv4, GEOIP_CHARSET_UTF8);
+	    pp->priv = db;
 	}
+
+	if (!pp->free)
+	    pp->free = (vmod_priv_free_f *)cleanup_db;
+	
+
+	return 1;
 }
 
 GeoIPRecord*
@@ -52,8 +82,8 @@ get_geoip_record(struct sess *sp, struct vmod_priv *pp, const char * ip) {
 	    return NULL;
 	}
     }
-    
-    return GeoIP_record_by_addr(pp->priv, ip);
+    GeoipDB *db = (GeoipDB *)pp->priv;    
+    return GeoIP_record_by_addr(db->ipv4, ip);
 }
 
 const char *
@@ -215,7 +245,7 @@ vmod_region_name_ip(struct sess *sp, struct vmod_priv *pp, struct sockaddr_stora
 int
 init_priv_v6(struct vmod_priv *pp)
 {  
-
+    /*
     pp->priv = GeoIP_open_type(GEOIP_CITY_EDITION_REV1_V6,GEOIP_MMAP_CACHE);
     if (pp->priv) {
         pp->free = (vmod_priv_free_f *)GeoIP_delete;
@@ -225,6 +255,30 @@ init_priv_v6(struct vmod_priv *pp)
     else {
         return 0;
     }
+    */
+    GeoipDB *db;
+    GeoIP *Rec = GeoIP_open_type(GEOIP_CITY_EDITION_REV1_V6,GEOIP_MMAP_CACHE);
+
+    if (!Rec)
+	return 0;
+
+    if (pp->priv) {
+        db = (GeoipDB *)pp->priv;
+        db->ipv6 = Rec;
+        GeoIP_set_charset(db->ipv6, GEOIP_CHARSET_UTF8);
+    }
+    else {
+        db = (GeoipDB *)calloc(0,sizeof(GeoipDB));
+        db->ipv6 = Rec;
+        GeoIP_set_charset(db->ipv6, GEOIP_CHARSET_UTF8);
+        pp->priv = db;
+    }
+
+    if (!pp->free)
+        pp->free = (vmod_priv_free_f *)cleanup_db;
+
+    return 1;
+ 
 }
 
 GeoIPRecord*
@@ -235,8 +289,8 @@ get_geoip_record_v6(struct sess *sp,struct vmod_priv *pp, const char *ip) {
 	    return NULL;
 	}
     }
-
-    return GeoIP_record_by_addr_v6(pp->priv, ip);
+    GeoipDB *db = (GeoipDB *)pp->priv;
+    return GeoIP_record_by_addr_v6(db->ipv6, ip);
 }
 
 const char *
