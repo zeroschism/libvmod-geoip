@@ -46,31 +46,30 @@ init_priv(struct vmod_priv *pp)
 {
 	pp->priv = malloc(sizeof(GeoipDB));
 	if (!pp->priv)
-	    return 0;
+	    return 1;
 
 	GeoipDB *db = (GeoipDB *)pp->priv;
 	db->ipv4 = GeoIP_open_type(GEOIP_CITY_EDITION_REV1,GEOIP_MMAP_CACHE);
 	//db->ipv4 = GeoIP_open(GeoIPDBFileName[GEOIP_CITY_EDITION_REV1],GEOIP_MMAP_CACHE);
 	if (!db->ipv4)
-	    return 0;
+	    return 1;
 	GeoIP_set_charset(db->ipv4, GEOIP_CHARSET_UTF8);
 	#ifdef HAVE_GEOIP_V6
-	db->ipv6 = GeoIP_open_type(GEOIP_CITY_EDITION_REV1_V6,GEOIP_MMAP_CACHE);
-	//db->ipv6 = GeoIP_open(GeoIPDBFileName[GEOIP_CITY_EDITION_REV1_V6],GEOIP_MMAP_CACHE);
-	if (!db->ipv6)
-	    return 0;
-	GeoIP_set_charset(db->ipv6, GEOIP_CHARSET_UTF8);
+	    db->ipv6 = GeoIP_open_type(GEOIP_CITY_EDITION_REV1_V6,GEOIP_MMAP_CACHE);
+	    //db->ipv6 = GeoIP_open(GeoIPDBFileName[GEOIP_CITY_EDITION_REV1_V6],GEOIP_MMAP_CACHE);
+	    if (!db->ipv6)
+		return 1;
+	    GeoIP_set_charset(db->ipv6, GEOIP_CHARSET_UTF8);
 	#endif
-	//pp->priv = db;
 	pp->free = (vmod_priv_free_f *)cleanup_db;
 	
-	return 1;
+	return 0;
 }
 /*
 GeoIPRecord*
 get_geoip_record(struct sess *sp, struct vmod_priv *pp, const char * ip) {
     if (!pp->priv) {
-	if (! init_priv(pp)) {
+	if (init_priv(pp)) {
 	    WSP(sp,SLT_VCL_Log, "%s", "Unable to load geoip dat file");
 	    return NULL;
 	}
@@ -86,7 +85,7 @@ vmod_city(struct sess *sp, struct vmod_priv *pp, const char * ip) {
 
     if (ip) {
 	if (!pp->priv) {
-            if (! init_priv(pp)) {
+            if (init_priv(pp)) {
 	        WSP(sp,SLT_VCL_Log, "%s", "Unable to load geoip dat file");
 	        return NULL;
 	    }
@@ -97,7 +96,8 @@ vmod_city(struct sess *sp, struct vmod_priv *pp, const char * ip) {
 	if (record->city) {
 	    city = WS_Dup(sp->wrk->ws, record->city);
 	}
-	GeoIPRecord_delete(record);
+	if (record)
+	    GeoIPRecord_delete(record);
 	
     }
 
@@ -122,7 +122,7 @@ vmod_latitude(struct sess *sp, struct vmod_priv *pp, const char * ip) {
 	    
     if (ip) {
 	if (!pp->priv) {
-	    if (! init_priv(pp)) {
+	    if (init_priv(pp)) {
 		WSP(sp,SLT_VCL_Log, "%s", "Unable to load geoip dat file");
 		return NULL;
 	    }
@@ -131,13 +131,14 @@ vmod_latitude(struct sess *sp, struct vmod_priv *pp, const char * ip) {
 	record = GeoIP_record_by_addr(db->ipv4, ip);
 	if (record->latitude) {
 	    v = snprintf(lat, HEADER_MAXLEN, "%f", record->latitude);
-	    GeoIPRecord_delete(record);
 	    v++;
 	}
 	else {
 	    v = snprintf(lat, HEADER_MAXLEN, "%s", GI_UNKNOWN_STRING);
 	    v++;
 	}
+	if (record)
+	    GeoIPRecord_delete(record);
     }
     else {
 	v = snprintf(lat, HEADER_MAXLEN, "%s", GI_UNKNOWN_STRING);
@@ -171,7 +172,7 @@ vmod_longitude(struct sess *sp, struct vmod_priv *pp, const char * ip) {
 
     if (ip) {
 	if (!pp->priv) {
-            if (! init_priv(pp)) {
+            if (init_priv(pp)) {
                 WSP(sp,SLT_VCL_Log, "%s", "Unable to load geoip dat file");
                 return NULL;
             }
@@ -180,13 +181,14 @@ vmod_longitude(struct sess *sp, struct vmod_priv *pp, const char * ip) {
 	record = GeoIP_record_by_addr(db->ipv4, ip);
 	if (record->longitude) {
 	    v = snprintf(longitude, HEADER_MAXLEN, "%f", record->longitude);
-	    GeoIPRecord_delete(record);
 	    v++;
 	}
 	else {
 	    snprintf(longitude, HEADER_MAXLEN, "%s", GI_UNKNOWN_STRING);
 	    v++;
 	}
+	if (record)
+	    GeoIPRecord_delete(record);
     }
     else {
 	v = snprintf(longitude, HEADER_MAXLEN, "%s", GI_UNKNOWN_STRING);
@@ -214,7 +216,7 @@ vmod_country_code(struct sess *sp, struct vmod_priv *pp, const char *ip) {
 
     if (ip) {
 	if (!pp->priv) {
-            if (! init_priv(pp)) {
+            if (init_priv(pp)) {
                 WSP(sp,SLT_VCL_Log, "%s", "Unable to load geoip dat file");
                 return NULL;
             }
@@ -224,7 +226,8 @@ vmod_country_code(struct sess *sp, struct vmod_priv *pp, const char *ip) {
 	if (record->country_code) {
 	    country_code = WS_Dup(sp->wrk->ws,record->country_code);
 	}
-	GeoIPRecord_delete(record);
+	if (record)
+	    GeoIPRecord_delete(record);
     }
 
     return country_code;
@@ -242,7 +245,7 @@ vmod_country_name(struct sess *sp, struct vmod_priv *pp, const char *ip) {
 
     if (ip) {
 	if (!pp->priv) {
-            if (! init_priv(pp)) {
+            if (init_priv(pp)) {
                 WSP(sp,SLT_VCL_Log, "%s", "Unable to load geoip dat file");
                 return NULL;
             }
@@ -252,7 +255,8 @@ vmod_country_name(struct sess *sp, struct vmod_priv *pp, const char *ip) {
 	if (record->country_name) {
 	    country_name = WS_Dup(sp->wrk->ws, record->country_name);
 	}
-	GeoIPRecord_delete(record);
+	if (record)
+	    GeoIPRecord_delete(record);
     }
 
     return country_name;
@@ -270,7 +274,7 @@ vmod_region_name(struct sess *sp, struct vmod_priv *pp, const char *ip) {
 
     if (ip) {
 	if (!pp->priv) {
-            if (! init_priv(pp)) {
+            if (init_priv(pp)) {
                 WSP(sp,SLT_VCL_Log, "%s", "Unable to load geoip dat file");
                 return NULL;
             }
@@ -280,7 +284,8 @@ vmod_region_name(struct sess *sp, struct vmod_priv *pp, const char *ip) {
 	if (record->region) {
 	    region = WS_Dup(sp->wrk->ws, record->region);
 	}
-	GeoIPRecord_delete(record);
+	if (record)
+	    GeoIPRecord_delete(record);
     }
 
     return region;
@@ -351,7 +356,7 @@ vmod_city_v6(struct sess *sp, struct vmod_priv *pp, const char *ip) {
 
     if (ip) {
 	if (!pp->priv) {
-            if (! init_priv(pp)) {
+            if (init_priv(pp)) {
                 WSP(sp,SLT_VCL_Log, "%s", "Unable to load geoip6 dat file");
                 return NULL;
             }
@@ -361,7 +366,8 @@ vmod_city_v6(struct sess *sp, struct vmod_priv *pp, const char *ip) {
 	if (record->city) {
 	    city = WS_Dup(sp->wrk->ws,record->city);
 	}
-	GeoIPRecord_delete(record);
+	if (record)
+	    GeoIPRecord_delete(record);
     }
 
     return city;
@@ -383,7 +389,7 @@ vmod_latitude_v6(struct sess *sp, struct vmod_priv *pp, const char *ip) {
 
     if (ip) {
 	if (!pp->priv) {
-            if (! init_priv(pp)) {
+            if (init_priv(pp)) {
                 WSP(sp,SLT_VCL_Log, "%s", "Unable to load geoip dat file");
                 return NULL;
             }
@@ -392,13 +398,14 @@ vmod_latitude_v6(struct sess *sp, struct vmod_priv *pp, const char *ip) {
 	record = GeoIP_record_by_addr_v6(db->ipv6, ip);
 	if (record->latitude) {
 	    v = snprintf(lat, HEADER_MAXLEN, "%f", record->latitude);
-	    GeoIPRecord_delete(record);
 	    v++;
 	}
 	else {
 	    v = snprintf(lat, HEADER_MAXLEN, "%s", GI_UNKNOWN_STRING);
 	    v++;
 	}
+	if (record)
+	    GeoIPRecord_delete(record);
     }
     else {
 	v = snprintf(lat, HEADER_MAXLEN, "%s", GI_UNKNOWN_STRING);
@@ -431,7 +438,7 @@ vmod_longitude_v6(struct sess *sp, struct vmod_priv *pp, const char *ip) {
 
     if (ip) {
 	if (!pp->priv) {
-            if (! init_priv(pp)) {
+            if (init_priv(pp)) {
                 WSP(sp,SLT_VCL_Log, "%s", "Unable to load geoip dat file");
                 return NULL;
             }
@@ -440,13 +447,14 @@ vmod_longitude_v6(struct sess *sp, struct vmod_priv *pp, const char *ip) {
         record = GeoIP_record_by_addr_v6(db->ipv6, ip);
         if (record->longitude) {
             v = snprintf(longitude, HEADER_MAXLEN, "%f", record->longitude);
-	    GeoIPRecord_delete(record);
             v++;
         }
         else {
             v = snprintf(longitude, HEADER_MAXLEN, "%s", GI_UNKNOWN_STRING);
             v++;
         }
+	if (record)
+	    GeoIPRecord_delete(record);
     }
     else {
         v = snprintf(longitude, HEADER_MAXLEN, "%s", GI_UNKNOWN_STRING);
@@ -475,7 +483,7 @@ vmod_country_code_v6(struct sess *sp, struct vmod_priv *pp, const char *ip) {
 
     if (ip) {
 	if (!pp->priv) {
-            if (! init_priv(pp)) {
+            if (init_priv(pp)) {
                 WSP(sp,SLT_VCL_Log, "%s", "Unable to load geoip dat file");
                 return NULL;
             }
@@ -485,7 +493,8 @@ vmod_country_code_v6(struct sess *sp, struct vmod_priv *pp, const char *ip) {
 	if (record->country_code) {
 	    country_code = WS_Dup(sp->wrk->ws,record->country_code);
 	}
-	GeoIPRecord_delete(record);
+	if (record)
+	    GeoIPRecord_delete(record);
     }
 
     return country_code;
@@ -503,7 +512,7 @@ vmod_country_name_v6(struct sess *sp, struct vmod_priv *pp, const char *ip) {
 
     if (ip) {
         if (!pp->priv) {
-            if (! init_priv(pp)) {
+            if (init_priv(pp)) {
                 WSP(sp,SLT_VCL_Log, "%s", "Unable to load geoip dat file");
                 return NULL;
             }
@@ -513,7 +522,8 @@ vmod_country_name_v6(struct sess *sp, struct vmod_priv *pp, const char *ip) {
         if (record->country_name) {
 	    const char *country_name = WS_Dup(sp->wrk->ws,record->country_name);
 	}
-	GeoIPRecord_delete(record);
+	if (record)
+	    GeoIPRecord_delete(record);
     }
 
     return country_name;
@@ -531,7 +541,7 @@ vmod_region_name_v6(struct sess *sp, struct vmod_priv *pp, const char *ip) {
 
     if (ip) {
 	if (!pp->priv) {
-            if (! init_priv(pp)) {
+            if (init_priv(pp)) {
                 WSP(sp,SLT_VCL_Log, "%s", "Unable to load geoip dat file");
                 return NULL;
             }
@@ -541,7 +551,8 @@ vmod_region_name_v6(struct sess *sp, struct vmod_priv *pp, const char *ip) {
 	if (record->region) {
 	    region = WS_Dup(sp->wrk->ws,record->region);
 	}
-	GeoIPRecord_delete(record);
+	if (record)
+	    GeoIPRecord_delete(record);
     }
 
     return region;
