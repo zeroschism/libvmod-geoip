@@ -29,6 +29,18 @@ typedef struct vmod_geoip_db_type {
     GeoIP    *ipv6;
 } GeoipDB;
 
+const char * Geoip_header_name[8] =
+{
+    "\013X-Geo-City:",
+    "\016X-Geo-Country:",
+    "\015X-Geo-Region:",
+    "\017X-Geo-Latitude:",
+    "\020X-Geo-Longitude:",
+    "\020X-Geo-Latitude1:",
+    "\021X-Geo-Longitude1:",
+    "\011X-Geo-IP:"
+};
+
 static void
 cleanup_db(GeoipDB *db)
 {
@@ -76,6 +88,76 @@ get_geoip_record(struct sess *sp, struct vmod_priv *pp, const char * ip) {
     }
     GeoipDB *db = (GeoipDB *)pp->priv;    
     return GeoIP_record_by_addr(db->ipv4, ip);
+}
+
+void
+vmod_set_headers(struct sess *sp, struct vmod_priv *pp, const char *ip) {
+    GeoIPRecord *record;
+
+    if (ip) {
+	record = get_geoip_record(sp, pp, ip);
+	struct http *hp = sp->http;
+	const char *resolved = NULL;
+    
+	if (record->city) { 
+	    VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[0], record->city, vrt_magic_string_end);
+	    resolved = VRT_WrkString(sp, "city ", record->city,vrt_magic_string_end);
+	}
+	else {
+	    VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[0], GI_UNKNOWN_STRING, vrt_magic_string_end);
+	    resolved = VRT_WrkString(sp, "city ",vrt_magic_string_end);
+	}
+	if (record->region) {
+	    VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[2], record->region, vrt_magic_string_end);
+	    resolved = VRT_WrkString(sp, resolved, " region ", record->region,vrt_magic_string_end);
+	}
+	else {
+	    VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[2], GI_UNKNOWN_STRING, vrt_magic_string_end);
+	    resolved = VRT_WrkString(sp, resolved, " region ",vrt_magic_string_end);
+	}
+	if (record->country_code) {
+	    VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[1], record->country_code, vrt_magic_string_end);
+	    resolved = VRT_WrkString(sp, resolved, " country ", record->country_code, vrt_magic_string_end);
+	}
+	else {
+	    VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[1], GI_UNKNOWN_STRING, vrt_magic_string_end);
+	    resolved = VRT_WrkString(sp, resolved, " country ",vrt_magic_string_end);
+	}
+	if (record->latitude) {
+	    VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[3], VRT_double_string(sp,record->latitude), vrt_magic_string_end);
+	    VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[5], VRT_int_string(sp,(int)record->latitude), vrt_magic_string_end);
+	    resolved = VRT_WrkString(sp, resolved, " lat ", VRT_double_string(sp,record->latitude), vrt_magic_string_end);
+	}
+	else {
+	    VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[3], GI_UNKNOWN_STRING, vrt_magic_string_end);
+	    VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[5], GI_UNKNOWN_STRING, vrt_magic_string_end);
+	    resolved = VRT_WrkString(sp, resolved, " lat ",vrt_magic_string_end);
+	}
+	if (record->longitude) {
+	    VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[4], VRT_double_string(sp,record->longitude), vrt_magic_string_end);
+	    VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[6], VRT_int_string(sp,(int)record->longitude), vrt_magic_string_end);
+	    resolved = VRT_WrkString(sp, resolved, " lon ", VRT_double_string(sp,record->longitude), vrt_magic_string_end);
+	}
+	else {
+	    VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[4], GI_UNKNOWN_STRING, vrt_magic_string_end);
+	    VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[6], GI_UNKNOWN_STRING, vrt_magic_string_end);
+	    resolved = VRT_WrkString(sp, resolved, " lon ");
+	}
+
+	//resolved = VRT_WrkString(sp, resolved, " ip ", ip, vrt_magic_string_end);
+	VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[7], VRT_WrkString(sp, resolved, " ip ", ip, vrt_magic_string_end), vrt_magic_string_end);
+
+	if (record)
+	    GeoIPRecord_delete(record);
+    }
+    else {
+	WSP(sp,SLT_VCL_Log, "%s", "Headers not set, no IP to lookup");
+    }
+}
+
+void
+vmod_set_headers_ip(struct sess *sp, struct vmod_priv *pp, struct sockaddr_storage *ip) {
+    vmod_set_headers(sp,pp,VRT_IP_string(sp,ip));
 }
 
 const char *

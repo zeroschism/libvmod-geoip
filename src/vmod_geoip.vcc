@@ -24,3 +24,5 @@ Function STRING latitude_ip(PRIV_VCL, IP)
 Function STRING longitude(PRIV_VCL, STRING)
 Function STRING longitude_ip(PRIV_VCL, IP)
 
+Function VOID set_headers(PRIV_VCL, STRING)
+Function VOID set_headers_ip(PRIV_VCL, IP)

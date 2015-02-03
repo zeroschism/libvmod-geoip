@@ -1,0 +1,28 @@
+varnishtest "Test geoip vmod"
+
+server s1 {
+        rxreq
+	expect req.http.X-Geo-City == "Houston"
+	expect req.http.X-Geo-Region == "TX"
+	expect req.http.X-Geo-Country == "US"
+	expect req.http.X-Geo-Latitude == "29.748"
+	expect req.http.X-Geo-Latitude1 == "29"
+	expect req.http.X-Geo-Longitude == "-95.491"
+	expect req.http.X-Geo-Longitude1 == "-95"
+	expect req.http.X-Geo-IP == "city Houston region TX country US lat 29.748 lon -95.491 ip 38.100.147.146"
+        txresp
+} -start
+
+varnish v1 -vcl+backend {
+        import geoip from "${vmod_topbuild}/src/.libs/libvmod_geoip.so";
+
+        sub vcl_recv {
+                geoip.set_headers("38.100.147.146");
+        }
+} -start
+
+client c1 {
+        txreq -url "/"
+        rxresp
+} -run
+
