@@ -36,6 +36,9 @@ Function STRING longitude_ip(PRIV_VCL, IP)
 Function STRING longitude_v6(PRIV_VCL, STRING)
 Function STRING longitude_v6_ip(PRIV_VCL, IP)
 
+## set ALL the FA headers
 Function VOID set_headers(PRIV_VCL, STRING)
 Function VOID set_headers_ip(PRIV_VCL, IP)
+Function VOID set_headers_v6(PRIV_VCL, STRING)
+Function VOID set_headers_v6_ip(PRIV_VCL, IP)
 
