@@ -415,7 +415,7 @@ vmod_set_headers_v6(struct sess *sp, struct vmod_priv *pp, const char *ip) {
 
 void
 vmod_set_headers_v6_ip(struct sess *sp, struct vmod_priv *pp, struct sockaddr_storage *ip) {
-    vmod_set_headers(sp,pp,VRT_IP_string(sp,ip));
+    vmod_set_headers_v6(sp,pp,VRT_IP_string(sp,ip));
 }
 
 const char *
