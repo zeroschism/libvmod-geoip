@@ -141,7 +141,7 @@ vmod_set_headers(struct sess *sp, struct vmod_priv *pp, const char *ip) {
 	else {
 	    VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[4], GI_UNKNOWN_STRING, vrt_magic_string_end);
 	    VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[6], GI_UNKNOWN_STRING, vrt_magic_string_end);
-	    resolved = VRT_WrkString(sp, resolved, " lon ");
+	    resolved = VRT_WrkString(sp, resolved, " lon ", vrt_magic_string_end);
 	}
 
 	//resolved = VRT_WrkString(sp, resolved, " ip ", ip, vrt_magic_string_end);
