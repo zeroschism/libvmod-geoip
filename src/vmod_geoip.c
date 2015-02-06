@@ -96,9 +96,21 @@ vmod_set_headers(struct sess *sp, struct vmod_priv *pp, const char *ip) {
 
     if (ip) {
 	record = get_geoip_record(sp, pp, ip);
-	struct http *hp = sp->http;
 	const char *resolved = NULL;
-    
+
+	if (!record) {
+	    VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[0], GI_UNKNOWN_STRING, vrt_magic_string_end);
+	    VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[2], GI_UNKNOWN_STRING, vrt_magic_string_end);
+	    VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[1], GI_UNKNOWN_STRING, vrt_magic_string_end);
+	    VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[3], GI_UNKNOWN_STRING, vrt_magic_string_end);
+	    VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[5], GI_UNKNOWN_STRING, vrt_magic_string_end);
+	    VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[4], GI_UNKNOWN_STRING, vrt_magic_string_end);
+            VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[6], GI_UNKNOWN_STRING, vrt_magic_string_end);
+	    VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[7], GI_UNKNOWN_STRING, vrt_magic_string_end);
+	    WSP(sp,SLT_VCL_Log, "%s %s", "No record for ip", ip);
+	    return;
+	}
+
 	if (record->city) { 
 	    VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[0], record->city, vrt_magic_string_end);
 	    resolved = VRT_WrkString(sp, "city ", record->city,vrt_magic_string_end);
@@ -152,6 +164,7 @@ vmod_set_headers(struct sess *sp, struct vmod_priv *pp, const char *ip) {
     }
     else {
 	WSP(sp,SLT_VCL_Log, "%s", "Headers not set, no IP to lookup");
+	return;
     }
 }
 
@@ -355,8 +368,20 @@ vmod_set_headers_v6(struct sess *sp, struct vmod_priv *pp, const char *ip) {
 
     if (ip) {
         record = get_geoip_record_v6(sp, pp, ip);
-        struct http *hp = sp->http;
         const char *resolved = NULL;
+
+	if (!record) {
+            VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[0], GI_UNKNOWN_STRING, vrt_magic_string_end);
+            VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[2], GI_UNKNOWN_STRING, vrt_magic_string_end);
+            VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[1], GI_UNKNOWN_STRING, vrt_magic_string_end);
+            VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[3], GI_UNKNOWN_STRING, vrt_magic_string_end);
+            VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[5], GI_UNKNOWN_STRING, vrt_magic_string_end);
+            VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[4], GI_UNKNOWN_STRING, vrt_magic_string_end);
+            VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[6], GI_UNKNOWN_STRING, vrt_magic_string_end);
+            VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[7], GI_UNKNOWN_STRING, vrt_magic_string_end);
+            WSP(sp,SLT_VCL_Log, "%s %s", "No record for ip", ip);
+            return;
+        }
 
         if (record->city) {
             VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[0], record->city, vrt_magic_string_end);
@@ -400,7 +425,7 @@ vmod_set_headers_v6(struct sess *sp, struct vmod_priv *pp, const char *ip) {
         else {
             VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[4], GI_UNKNOWN_STRING, vrt_magic_string_end);
             VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[6], GI_UNKNOWN_STRING, vrt_magic_string_end);
-            resolved = VRT_WrkString(sp, resolved, " lon ");
+            resolved = VRT_WrkString(sp, resolved, " lon ", vrt_magic_string_end);
         }
 
         VRT_SetHdr(sp, HDR_REQ, Geoip_header_name[7], VRT_WrkString(sp, resolved, " ip ", ip, vrt_magic_string_end), vrt_magic_string_end);
@@ -410,6 +435,7 @@ vmod_set_headers_v6(struct sess *sp, struct vmod_priv *pp, const char *ip) {
     }
     else {
         WSP(sp,SLT_VCL_Log, "%s", "Headers not set, no IP to lookup");
+	return;
     }
 }
 
